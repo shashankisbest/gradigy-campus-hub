@@ -44,49 +44,76 @@ const Auth = () => {
     }
   };
 
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!email || !password || !fullName) {
-      toast.error('Please fill in all fields');
-      return;
-    }
+const handleSignUp = async (e: React.FormEvent) => {
+  e.preventDefault();
+  
+  if (!email || !password || !fullName) {
+    toast.error('Please fill in all fields');
+    return;
+  }
 
-    if (password.length < 6) {
-      toast.error('Password must be at least 6 characters');
-      return;
-    }
+  if (password.length < 6) {
+    toast.error('Password must be at least 6 characters');
+    return;
+  }
 
-    setLoading(true);
-    try {
-      const redirectUrl = `${window.location.origin}/`;
-      
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: fullName,
-            role: role,
-          },
-          emailRedirectTo: redirectUrl,
+  setLoading(true);
+  try {
+    // Step 1: Sign up the user
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: fullName,
+          role: role,
         },
-      });
+      },
+    });
 
-      if (error) throw error;
-      
-      toast.success('Account created successfully!');
-      navigate('/');
-    } catch (error: any) {
-      if (error.message.includes('already registered')) {
-        toast.error('This email is already registered. Please sign in instead.');
-      } else {
-        toast.error(error.message || 'Failed to sign up');
-      }
-    } finally {
-      setLoading(false);
+    if (authError) throw authError;
+
+    // Step 2: Manually create profile if needed
+    if (authData.user) {
+      // Wait a bit for trigger, then check if profile exists
+      setTimeout(async () => {
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', authData.user.id)
+          .single();
+
+        if (profileError || !profile) {
+          // Create profile manually if trigger failed
+          console.log('Trigger failed, creating profile manually...');
+          const { error: insertError } = await supabase
+            .from('profiles')
+            .insert({
+              id: authData.user.id,
+              full_name: fullName,
+              role: role,
+            });
+
+          if (insertError) {
+            console.error('Manual profile creation failed:', insertError);
+          }
+        }
+      }, 2000);
     }
-  };
+
+    toast.success('Account created successfully! Check your email to confirm.');
+    navigate('/auth'); // Go back to auth page for sign in
+    
+  } catch (error: any) {
+    if (error.message.includes('already registered')) {
+      toast.error('This email is already registered. Please sign in instead.');
+    } else {
+      toast.error(error.message || 'Failed to sign up');
+    }
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'var(--gradient-hero)' }}>

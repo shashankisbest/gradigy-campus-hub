@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Navigation from '@/components/Navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,6 +19,19 @@ const Resources = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [link, setLink] = useState('');
+
+    // DEBUG: Check what we're getting
+  useEffect(() => {
+    console.log('🔍 RESOURCES DEBUG:');
+    console.log('User:', user);
+    console.log('User Role:', userRole);
+    console.log('User Metadata:', user?.user_metadata);
+    console.log('Is faculty?', userRole === 'faculty');
+  }, [user, userRole]);
+
+  // Temporary: Also check if we can get role directly from metadata
+  const roleFromMeta = user?.user_metadata?.role;
+  console.log('Role from metadata:', roleFromMeta);
 
   const { data: resources, isLoading } = useQuery({
     queryKey: ['resources'],

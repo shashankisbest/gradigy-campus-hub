@@ -56,19 +56,48 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const fetchUserRole = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', userId)
-        .single();
-      
-      if (error) throw error;
-      setUserRole(data?.role || null);
-    } catch (error) {
-      console.error('Error fetching user role:', error);
+  try {
+    console.log('Fetching role for user:', userId);
+    
+    // Add a small delay to ensure profile is created
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', userId)
+      .single();
+    
+    if (error) {
+      console.log('Error fetching role:', error);
+      // If profile doesn't exist yet, try creating it from user metadata
+      const user = await supabase.auth.getUser();
+      if (user.data.user) {
+        const userMetadata = user.data.user.user_metadata;
+        console.log('User metadata:', userMetadata);
+        
+        // Set role from metadata directly as fallback
+        if (userMetadata.role === 'faculty' || userMetadata.role === 'student') {
+          setUserRole(userMetadata.role);
+          return;
+        }
+      }
+      throw error;
     }
-  };
+    
+    console.log('Fetched role from profiles:', data?.role);
+    setUserRole(data?.role || null);
+  } catch (error) {
+    console.error('Error fetching user role:', error);
+    // Final fallback - check user metadata
+    const user = await supabase.auth.getUser();
+    const roleFromMeta = user.data.user?.user_metadata?.role;
+    if (roleFromMeta === 'faculty' || roleFromMeta === 'student') {
+      console.log('Using role from metadata:', roleFromMeta);
+      setUserRole(roleFromMeta);
+    }
+  }
+};
 
   const signOut = async () => {
     await supabase.auth.signOut();
