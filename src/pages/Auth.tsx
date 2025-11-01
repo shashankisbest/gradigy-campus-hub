@@ -171,7 +171,7 @@ const handleSignUp = async (e: React.FormEvent) => {
                   <Input
                     id="signup-name"
                     type="text"
-                    placeholder="John Doe"
+                    placeholder="your name here"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     required
