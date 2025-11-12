@@ -25,7 +25,7 @@ const Navigation = () => {
             <div className="bg-primary rounded-full p-2">
               <GraduationCap className="w-5 h-5 text-primary-foreground" />
             </div>
-            <span>Gradigy</span>
+            <span>Gradify</span>
           </Link>
 
           <div className="flex items-center space-x-1">

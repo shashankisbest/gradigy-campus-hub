@@ -124,7 +124,7 @@ const handleSignUp = async (e: React.FormEvent) => {
               <GraduationCap className="w-8 h-8 text-primary-foreground" />
             </div>
           </div>
-          <CardTitle className="text-3xl font-bold">Gradigy</CardTitle>
+          <CardTitle className="text-3xl font-bold">Gradify</CardTitle>
           <CardDescription>Student Management System</CardDescription>
         </CardHeader>
         <CardContent>
@@ -171,7 +171,7 @@ const handleSignUp = async (e: React.FormEvent) => {
                   <Input
                     id="signup-name"
                     type="text"
-                    placeholder="John Doe"
+                    placeholder="your name here"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     required
